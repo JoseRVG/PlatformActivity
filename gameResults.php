@@ -29,11 +29,11 @@ for($i = 0; $i < count($analytics); $i++){
     $date = strtotime($tempTime);
     if(date('Y-m-d', $date) == date('Y-m-d')){
       print_r($row['invenira_student_id']);
-      print_r(",");
+      print_r("#");
       print_r($row['user_name']);
-      print_r(",");
+      print_r("#");
       print_r($row['question_text']);
-      print_r(",");
+      print_r("#");
       print_r($row['answer_text']);
       print_r("*");
     }

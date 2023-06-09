@@ -44,7 +44,7 @@ while ($activity = $result->fetch_assoc()) {
             $videoLink = $question['is_video'];
         }
         $json_string = $json_string .
-            $question['id'] . ',' . $question['text'] . ',' .  $filename . ',' .$videoLink;
+            $question['id'] . '#' . $question['text'] . '#' .  $filename . '#' .$videoLink;
         
         $question_id = $question['id'];
         $sql = "SELECT * FROM answer WHERE question_id='$question_id'";
@@ -54,10 +54,10 @@ while ($activity = $result->fetch_assoc()) {
             if($answerID > 3) {
                 break;
             }
-            $json_string = $json_string . ',' . 'A' . $answerID . ',' . $answer['id'] . ',' . $answer['text'] . ',' . $answer['dificulty_level'] . ',' . $answer['next_question_id'];
+            $json_string = $json_string . '#' . 'A' . $answerID . '#' . $answer['id'] . '#' . $answer['text'] . '#' . $answer['dificulty_level'] . '#' . $answer['next_question_id'];
             $answerID++;  
         }
-        $json_string = $json_string . ',';
+        $json_string = $json_string . '#';
     }
     print_r($json_string);
     print_r("*");

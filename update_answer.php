@@ -1,7 +1,6 @@
 <?php
 session_start();
 include("liga_bd.php");
-
 $id = $_POST['id'];
 $question_id = $_POST['question_id'];
 

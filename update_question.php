@@ -27,7 +27,10 @@ if(filter_has_var(INPUT_POST,'checkbox_Question')){
     }
 }
 if(filter_has_var(INPUT_POST,'checkbox_Video')){
-    $is_video = htmlspecialchars($_POST['link']);
+    $string = htmlspecialchars($_POST['link']);
+    $first = explode('=', "$string",2);
+    print_r($first);
+    $is_video = "https://www.youtube.com/embed/" . $first[1];
     $sql = "UPDATE question SET is_video='$is_video' WHERE id='$ID'";
     if (mysqli_query($link, $sql)) {
         $_SESSION["success_msgs"][] = "Question updated successfully.";

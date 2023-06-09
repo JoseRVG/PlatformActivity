@@ -2,17 +2,6 @@
 include("header.php");
 $actID = $_GET['id'];
 
-// Get all the questions IDs and names
-$sql = "SELECT * FROM question WHERE activity_id=$actID";
-$result = mysqli_query($link, $sql);
-if (!$result) {
-  echo "mysql error";
-  exit;
-}
-while ($question = mysqli_fetch_assoc($result)) {
-  $allQuestions[] = $question;
-}
-
 //$activityName = htmlspecialchars($_POST["activityName"]);
 // Attempt insert query execution
 $sql = "SELECT * FROM activity WHERE activity.id=$actID";
@@ -27,11 +16,15 @@ if ($result->num_rows != 1) {
 }
 $activity = mysqli_fetch_assoc($result);
 
-$sql = "SELECT * FROM question WHERE question.activity_id=$actID";
+// Get all the questions IDs and names
+$sql = "SELECT * FROM question WHERE question.activity_id=$actID ORDER BY order_num";
 $result = mysqli_query($link, $sql);
 if (!$result) {
   echo "mysql error";
   exit;
+}
+while ($question = mysqli_fetch_assoc($result)) {
+  $allQuestions[] = $question;
 }
 
 if (!isset($_GET['question_id'])) {
@@ -53,13 +46,13 @@ $questionID = $_GET['question_id'];
       <br>
       <br>
       <div class="border double text-center">
-        <ul class="nav nav-pills flex-column">
+        <ul class="nav nav-pills flex-column" id="post_list">
           <p>
             <label for="exampleInputEmail1">Question List</label>
           </p>
           <?php foreach ($allQuestions as $aQuestion) { ?>
-            <li class="nav-item">
-              <a class="nav-link <?= ($aQuestion['id'] == $_GET['question_id']) ? "active" : "" ?>" href="?id=<?= $actID ?>&question_id=<?= $aQuestion['id'] ?>"><?= $aQuestion['title'] ?></a>
+            <li class="nav-item" data-post-id="<?php echo $aQuestion['id']; ?>">
+              <a class="nav-link <?= ($aQuestion['id'] == $_GET['question_id']) ? "active" : "" ?>" href="?id=<?= $actID ?>&question_id=<?= $aQuestion['id'] ?>"><?= $aQuestion['order_num'], ". ", $aQuestion['title'] ?></a>
             </li>
           <?php } ?>
         </ul>
@@ -90,7 +83,7 @@ $questionID = $_GET['question_id'];
           </p>
       </form>
     </div>
-    <?php while ($question = mysqli_fetch_assoc($result)) { ?>
+    <?php foreach ($allQuestions as $question) { ?>
       <?php if ($question['id'] == $questionID) { ?>
         <div class="border border-dark border-1 m-5 pb-5 bg-light text-dark">
           <div class="form-group mb-3 m-5">
@@ -100,11 +93,13 @@ $questionID = $_GET['question_id'];
               </p>
               <p>
                 <input id="title" type="text" class="form-control" placeholder="Question title" name="title" value="<?= $question['title'] ?>">
+                <label for="exampleInputEmail1">Validate Title</label>
                 <input type="checkbox" name="checkbox_Title" value="checkox_value">
               </p>
               <p>
-                <label for="exampleInputEmail1">Insert Question</label>
+                <label for="exampleInputEmail1">Question Text</label>
                 <input id="text" type="text" class="form-control" placeholder="Question text" name="text" value="<?= $question['text'] ?>">
+                <label for="exampleInputEmail1">Validate Question</label>
                 <input type="checkbox" name="checkbox_Question" value="checkox_value">
               </p>
               <div class="form-group mb-3">
@@ -118,6 +113,7 @@ $questionID = $_GET['question_id'];
                   <p>
                     <label for="exampleInputEmail1">Insert Link To Video</label>
                     <input id="link" type="text" class="form-control" placeholder="Video Link (Example: https://www.youtube.com/embed/sM7koeaj-gA)" name="link" value="<?= $question['is_video'] ?>">
+                      <label for="exampleInputEmail1">Validate Video Link</label>
                       <input type="checkbox" name="checkbox_Video" value="checkox_value">
                     </p>
                 </div>
@@ -125,7 +121,6 @@ $questionID = $_GET['question_id'];
                   <p>
                     <label for="exampleInputEmail1">Image Upload (Optional)</label>
                     <input id="upload" type="file" onchange="readURL(this);" name="filepath">
-                    <input type="checkbox" name="checkbox_Image" value="checkox_value">
                     <img id="preview" class="img-thumbnail" src="<?= "./media/" . $question['filename'] ?>" alt="" />
                   </p>
                 </div>
@@ -133,7 +128,7 @@ $questionID = $_GET['question_id'];
               <button type="submit" class="btn btn-success">Update question text and file</button>
             </form>
             <p>
-            <form id="delete_question" action="delete_question.php" method="POST">
+            <form class="delete_question">
               <div class="form-group mb-3">
                 <input type="hidden" name="id" value="<?= $question['id'] ?>">
                 <input type="hidden" name="activity_id" value="<?= $question['activity_id'] ?>">
@@ -145,7 +140,7 @@ $questionID = $_GET['question_id'];
             $questionID = $question['id'];
             $sql = "SELECT * FROM answer WHERE answer.question_id=$questionID";
             $resultAnswers = mysqli_query($link, $sql);
-            if (!$result) {
+            if (!$resultAnswers) {
               echo "mysql error";
               exit;
             }
@@ -154,7 +149,7 @@ $questionID = $_GET['question_id'];
             ?>
               <div class="border border-dark border-1 m-5 pb-5">
                 <div class="form-group mb-3 m-5">
-                  <form id="update_answer" action="update_answer.php" method="POST">
+                  <form class="update_answer">
                     <p>
                       <label for="exampleInputEmail1">Answer <?= $count = $count + 1 ?></label>
                     </p>
@@ -162,10 +157,11 @@ $questionID = $_GET['question_id'];
                       <input type="hidden" name="id" value="<?= $answer['id'] ?>">
                       <label for="exampleInputEmail1">Answer Text</label>
                       <input type="text" class="form-control" placeholder="Text" name="text" value="<?= $answer['text'] ?>">
+                      <label for="exampleInputEmail1">Validate Answer</label>
                       <input type="checkbox" name="checkbox_Answer" value="checkox_value">
                     </p>
                     <p>
-                      <label for="exampleInputEmail1">Dificulty Level</label>
+                      <label for="exampleInputEmail1">Next Question Level of Dificulty</label>
                       <select name="dificulty_level">
                       <?php if ($answer['dificulty_level'] == "Medium") { ?>
                         <option value= "<?= $answer['dificulty_level'] ?>"> <?= $answer['dificulty_level'] ?></option>
@@ -188,6 +184,7 @@ $questionID = $_GET['question_id'];
                         <option value="Higher">Higher</option> 
                         <?php } ?>
                       </select>
+                      <label for="exampleInputEmail1">Validate Next Question Level of Dificult</label>
                       <input type="checkbox" name="checkbox_Dificulty" value="checkox_value">
                     </p>
                     <p>
@@ -198,6 +195,7 @@ $questionID = $_GET['question_id'];
                           <option <?= ($aQuestion['id'] == $answer['next_question_id']) ? "selected" : "" ?> value="<?= $aQuestion['id'] ?>"><?= $aQuestion['title'] ?></option>
                         <?php } ?>
                       </select>
+                      <label for="exampleInputEmail1">Validate go to Question</label>
                       <input type="checkbox" name="checkbox_next_question" value="checkox_value">
                     </p>
                     <p>
@@ -211,7 +209,7 @@ $questionID = $_GET['question_id'];
                     <button type="submit" class="btn btn-success">Update answer text, quality and next question</button>
                   </form>
                   <p>
-                  <form id="delete_answer" action="delete_answer.php" method="POST">
+                  <form class="delete_answer">
                     <div class="form-group mb-3">
                       <input type="hidden" name="id" value="<?= $answer['id'] ?>">
                       <input type="hidden" name="question_id" value="<?= $questionID ?>">
@@ -234,6 +232,34 @@ $questionID = $_GET['question_id'];
     <?php } ?>
   </div>
 </div>
+<script>
+	$(document).ready(function() {
+		$("#post_list").sortable({
+			update: function(event, ui) {
+				var post_order_ids = new Array();
+				$('#post_list li').each(function() {
+					post_order_ids.push($(this).data("post-id"));
+				});
+				$.ajax({
+					url: "update_fn.php",
+					method: "POST",
+					data: {
+						post_order_ids: post_order_ids
+					},
+					success: function(data) {
+						if (data) {
+							$(".alert-danger").hide();
+							$(".alert-success").show();
+						} else {
+							$(".alert-success").hide();
+							$(".alert-danger").show();
+						}
+					}
+				});
+			}
+		});
+	});
+</script>
 <script>
   $(document).ready(function() {
     $('#purpose').on('change', function() {
@@ -264,7 +290,22 @@ $questionID = $_GET['question_id'];
   });
 </script>
 <script>
-  $('#update_question').submit(function(e) {
+  $('.update_answer').submit(function(e) {
+    e.preventDefault();
+    var data = $(this).serialize();
+    $.ajax({
+      method: 'POST',
+      url: 'update_answer.php',
+      data: data,
+      success: function(result) {
+        console.log(data);
+        alert('Activity name updated successfully.');
+      }
+    });
+  });
+</script>
+<script>
+  $('#update_question').on("submit", function(e) {
     e.preventDefault();
     $.ajax({
       url: 'update_question.php', // <-- point to server-side PHP script 
@@ -274,7 +315,7 @@ $questionID = $_GET['question_id'];
       data: new FormData(this),
       type: 'POST',
       success: function(result) {
-        alert(result);
+        alert('Question name updated successfully.');
       }
     });
   });
@@ -288,7 +329,49 @@ $questionID = $_GET['question_id'];
       url: 'add_answer.php',
       data: data,
       success: function(result) {
+        alert('Answer successfully added to answer.');
+      }
+    });
+  });
+</script>
+<script>
+  $('#add_question').submit(function(e) {
+    e.preventDefault();
+    var data = $(this).serialize();
+    $.ajax({
+      method: 'POST',
+      url: 'add_question.php',
+      data: data,
+      success: function(result) {
         alert('Answer successfully added to question.');
+      }
+    });
+  });
+</script>
+<script>
+  $('.delete_question').submit(function(e) {
+    e.preventDefault();
+    var data = $(this).serialize();
+    $.ajax({
+      method: 'POST',
+      url: 'delete_question.php',
+      data: data,
+      success: function(result) {
+        alert('Answer successfully delete to question.');
+      }
+    });
+  });
+</script>
+<script>
+  $('.delete_answer').submit(function(e) {
+    e.preventDefault();
+    var data = $(this).serialize();
+    $.ajax({
+      method: 'POST',
+      url: 'delete_answer.php',
+      data: data,
+      success: function(result) {
+        alert('Answer successfully delete to answer.');
       }
     });
   });

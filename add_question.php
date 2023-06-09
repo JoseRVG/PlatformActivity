@@ -4,9 +4,14 @@ include("liga_bd.php");
 
 $actID = $_POST['actID'];
 $title = "Untitled";
+$sql = "SELECT MAX(order_num) FROM question WHERE activity_id = $actID";
+$resultOrder = mysqli_query($link, $sql);
+
+$row = mysqli_fetch_assoc($resultOrder);
+$maxOrder = $row['MAX(order_num)'] + 1;
 
 // Attempt insert query execution
-$sql = "INSERT INTO question(`title`, `activity_id`) VALUES ('$title','$actID')";
+$sql = "INSERT INTO question(`title`, `activity_id`, `order_num`) VALUES ('$title','$actID','$maxOrder')";
 if (mysqli_query($link, $sql)) {
     $_SESSION["success_msgs"][] = "Question inserted successfully.";
 } else {
