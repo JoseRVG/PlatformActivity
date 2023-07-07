@@ -17,7 +17,7 @@ $title = "Untitled";
 // Add minimum amount of blank questions
 $minNumQuestions = 1;
 for ($i = 0; $i < $minNumQuestions; $i++) {
-    $sql = "INSERT INTO question (`title`, `activity_id`) VALUES ('$title','$activity_id')";
+    $sql = "INSERT INTO question (`title`, `activity_id`, `order_num`)  VALUES ('$title','$activity_id','1')";
     if (!mysqli_query($link, $sql)) {
         echo "ERROR: Could not able to execute $sql. " . mysqli_error($link);
     }

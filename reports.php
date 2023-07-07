@@ -164,7 +164,7 @@ mysqli_close($link);
           <tr>
             <th scope="col">Timestamp</th>
             <th scope="col">Activity</th>
-            <th scope="col">Student</th>
+            <th scope="col">Student ID</th>
 
             <th scope="col">Question Text</th>
             <th scope="col">Answer Text</th>
@@ -200,8 +200,8 @@ mysqli_close($link);
           <tr>
             <th scope="col">Timestamp</th>
             <th scope="col">Activity</th>
-            <th scope="col">Student</th>
-            <th scope="col">Started or finished cumming</th>
+            <th scope="col">Student ID</th>
+            <!-- <th scope="col">Started or finished</th> -->
           </tr>
         </thead>
         <tbody>
@@ -215,8 +215,7 @@ mysqli_close($link);
               <td><?= $row["timestamp"]; ?></td>
               <td><?= $row["name"]; ?></td>
               <td><?= $row["invenira_student_id"]; ?></td>
-
-              <td><?= $row["has_started"] ? "Started" : "Finished" ?></td>
+              <!-- <td><?= $row["has_started"] ? "Started" : "Finished" ?></td> -->
             </tr>
           <?php
           }
@@ -231,7 +230,7 @@ mysqli_close($link);
           <tr>
             <th scope="col">Timestamp</th>
             <th scope="col">Activity</th>
-            <th scope="col">Student</th>
+            <th scope="col">Student ID</th>
 
             <th scope="col">Finished viewing video?</th>
             <th scope="col">View duration (in s)</th>

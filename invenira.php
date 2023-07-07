@@ -18,7 +18,7 @@ $result = mysqli_query($link, $sql);
 
 print_r("Abel");
 print_r(";");
-print_r("30");
+print_r("7");
 
 // Close connection
 mysqli_close($link);

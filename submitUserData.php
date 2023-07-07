@@ -24,11 +24,12 @@ $json_data = json_decode($json,true);
 
 $name = $json_data["User Name"];
 $age = $json_data["Group Age"];
-$invenira = $json_data["IveniraID"];
+$invenira = $json_data["StudentID"];
 $activity = $json_data["ActivityID"];
+$gameCode = $json_data["GameCode"];
 
 // Attempt insert query execution
-$sql = "INSERT INTO `activityuser`(`user_name`, `age_group`, `activity_id`, `invenira_student_id`) VALUES ('$name','$age','$activity','$invenira')";
+$sql = "UPDATE `activityuser` SET `user_name`='$name', `age_group`='$age', `activity_id`='$activity', `invenira_student_id`='$invenira' WHERE `code`='$gameCode'";
 print_r($sql);
 
 if (mysqli_query($link, $sql)) {

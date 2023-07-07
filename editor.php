@@ -56,14 +56,14 @@ $questionID = $_GET['question_id'];
             </li>
           <?php } ?>
         </ul>
-        <form id="add_question" action="add_question.php" method="POST">
+        <form class="add_question" action="add_question.php" method="POST">
           <input type="hidden" name="actID" value="<?= $actID ?>">
           <button type="submit" class="btn btn-success ">Create New Question</button>
         </form>
       </div>
     </div>
     <div class="col-md-9">
-      <form id="update_activity" class="border border-dark border-1 m-5 pb-5 bg-light text-dark">
+      <form id="update_activity" class="border border-dark border-1 m-5 pb-5 bg-light text-dark" action="update_activity.php" method="post">
         <div class="form-group mb-3 m-5">
           <input type="hidden" name="id" value="<?= $actID ?>">
           <p>
@@ -93,14 +93,10 @@ $questionID = $_GET['question_id'];
               </p>
               <p>
                 <input id="title" type="text" class="form-control" placeholder="Question title" name="title" value="<?= $question['title'] ?>">
-                <label for="exampleInputEmail1">Validate Title</label>
-                <input type="checkbox" name="checkbox_Title" value="checkox_value">
               </p>
               <p>
                 <label for="exampleInputEmail1">Question Text</label>
                 <input id="text" type="text" class="form-control" placeholder="Question text" name="text" value="<?= $question['text'] ?>">
-                <label for="exampleInputEmail1">Validate Question</label>
-                <input type="checkbox" name="checkbox_Question" value="checkox_value">
               </p>
               <div class="form-group mb-3">
                 <p>
@@ -113,9 +109,7 @@ $questionID = $_GET['question_id'];
                   <p>
                     <label for="exampleInputEmail1">Insert Link To Video</label>
                     <input id="link" type="text" class="form-control" placeholder="Video Link (Example: https://www.youtube.com/embed/sM7koeaj-gA)" name="link" value="<?= $question['is_video'] ?>">
-                      <label for="exampleInputEmail1">Validate Video Link</label>
-                      <input type="checkbox" name="checkbox_Video" value="checkox_value">
-                    </p>
+                  </p>
                 </div>
                 <div id='image'>
                   <p>
@@ -157,8 +151,6 @@ $questionID = $_GET['question_id'];
                       <input type="hidden" name="id" value="<?= $answer['id'] ?>">
                       <label for="exampleInputEmail1">Answer Text</label>
                       <input type="text" class="form-control" placeholder="Text" name="text" value="<?= $answer['text'] ?>">
-                      <label for="exampleInputEmail1">Validate Answer</label>
-                      <input type="checkbox" name="checkbox_Answer" value="checkox_value">
                     </p>
                     <p>
                       <label for="exampleInputEmail1">Next Question Level of Dificulty</label>
@@ -184,8 +176,6 @@ $questionID = $_GET['question_id'];
                         <option value="Higher">Higher</option> 
                         <?php } ?>
                       </select>
-                      <label for="exampleInputEmail1">Validate Next Question Level of Dificult</label>
-                      <input type="checkbox" name="checkbox_Dificulty" value="checkox_value">
                     </p>
                     <p>
                       <label for="exampleInputEmail1">Answer go to question</label>
@@ -195,8 +185,6 @@ $questionID = $_GET['question_id'];
                           <option <?= ($aQuestion['id'] == $answer['next_question_id']) ? "selected" : "" ?> value="<?= $aQuestion['id'] ?>"><?= $aQuestion['title'] ?></option>
                         <?php } ?>
                       </select>
-                      <label for="exampleInputEmail1">Validate go to Question</label>
-                      <input type="checkbox" name="checkbox_next_question" value="checkox_value">
                     </p>
                     <p>
                       <label for="exampleInputEmail1">Next question</label>
@@ -221,7 +209,7 @@ $questionID = $_GET['question_id'];
               </div>
             <?php } ?>
             <p>
-            <form id="add_answer">
+            <form class="add_answer">
               <input type="hidden" name="question_id" value="<?= $question['id'] ?>">
               <button type="submit" class="btn btn-success">Create New Answer</button>
             </form>
@@ -261,33 +249,70 @@ $questionID = $_GET['question_id'];
 	});
 </script>
 <script>
-  $(document).ready(function() {
-    $('#purpose').on('change', function() {
-      if (this.value == '1')
-      //.....................^.......
-      {
-        $("#image").hide();
-        $("#video").show();
-      } else {
-        $("#image").show();
-        $("#video").hide();
-      }
-    });
+$(document).ready(function() {
+  // Get the initial form state
+  var initialPurpose = <?= !empty($question['filename']) ? 0 : 1 ?>;
+  var imageField = $('#upload');
+  var linkField = $('#link');
+
+  // Show/hide fields based on the initial state
+  if (initialPurpose === 0) {
+    $('#video').hide();
+  } else {
+    $('#image').hide();
+  }
+
+  // Update form state on purpose select change
+  $('#purpose').change(function() {
+    var selectedOption = $(this).val();
+
+    if (selectedOption === "0") {
+      $('#video').hide();
+      $('#image').show();
+    } else if (selectedOption === "1") {
+      $('#image').hide();
+      $('#video').show();
+    }
   });
-</script>
-<script>
-  $('#update_activity').submit(function(e) {
+
+  // Set the initial form state and show the appropriate field
+  $('#purpose').val(initialPurpose).trigger('change');
+
+  // Form submission
+  $('#update_question').on("submit", function(e) {
     e.preventDefault();
-    var data = $(this).serialize();
+    var form = $(this);
+    var purpose = $('#purpose').val();
+
+    var formData = new FormData();
+
+    formData.append('id', form.find('[name="id"]').val());
+    formData.append('title', form.find('[name="title"]').val());
+    formData.append('text', form.find('[name="text"]').val());
+
+    if (purpose === "0") {
+      if (imageField.prop('files').length > 0) {
+        formData.append('filepath', imageField.prop('files')[0]);
+      }
+    } else if (purpose === "1") {
+      if (linkField.val() !== '') {
+        formData.append('link', linkField.val());
+      }
+    }
+
     $.ajax({
-      method: 'POST',
-      url: 'update_activity.php',
-      data: data,
+      url: 'update_question.php',
+      cache: false,
+      contentType: false,
+      processData: false,
+      data: formData,
+      type: 'POST',
       success: function(result) {
-        alert('Activity name updated successfully.');
+        alert('Question was updated successfully.');
       }
     });
   });
+});
 </script>
 <script>
   $('.update_answer').submit(function(e) {
@@ -305,23 +330,7 @@ $questionID = $_GET['question_id'];
   });
 </script>
 <script>
-  $('#update_question').on("submit", function(e) {
-    e.preventDefault();
-    $.ajax({
-      url: 'update_question.php', // <-- point to server-side PHP script 
-      cache: false,
-      contentType: false,
-      processData: false,
-      data: new FormData(this),
-      type: 'POST',
-      success: function(result) {
-        alert('Question name updated successfully.');
-      }
-    });
-  });
-</script>
-<script>
-  $('#add_answer').submit(function(e) {
+  $('.add_answer').submit(function(e) {
     e.preventDefault();
     var data = $(this).serialize();
     $.ajax({
@@ -335,7 +344,7 @@ $questionID = $_GET['question_id'];
   });
 </script>
 <script>
-  $('#add_question').submit(function(e) {
+  $('.add_question').submit(function(e) {
     e.preventDefault();
     var data = $(this).serialize();
     $.ajax({
